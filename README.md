@@ -1,8 +1,8 @@
-# T/AO425 Kanban
+# Kanban
 
 ## Projektüberblick
 
-Interne Webanwendung für genau die Einheit T/AO425 als digitaler Ersatz für physische Kanban-Boards in T/AO425.
+Interne Webanwendung als digitaler Ersatz für physische Kanban-Boards.
 
 Aktueller Funktionsumfang:
 - mehrere Gruppenboards innerhalb von T/AO425
