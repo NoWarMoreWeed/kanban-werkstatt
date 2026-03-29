@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+.vite/
+.turbo/
+.env
+.env.local
+.env.*.local
+coverage/
+*.log
+*.tsbuildinfo
+tsc-trace.txt

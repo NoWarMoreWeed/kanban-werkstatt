@@ -1,0 +1,99 @@
+services:
+  backend-init:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: werkstatt-kanban-backend-init
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${BACKEND_NODE_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@database:5432/werkstatt_kanban?schema=public}
+    command:
+      [
+        "sh",
+        "-lc",
+        "npm run prisma:migrate:deploy && npm run prisma:seed"
+      ]
+    restart: "no"
+    networks:
+      - kanban-internal
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: werkstatt-kanban-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${FRONTEND_NODE_ENV:-development}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:4000/api}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    networks:
+      - kanban-internal
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: werkstatt-kanban-backend
+    restart: unless-stopped
+    depends_on:
+      backend-init:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${BACKEND_NODE_ENV:-development}
+      HOST: ${BACKEND_HOST:-0.0.0.0}
+      PORT: ${BACKEND_INTERNAL_PORT:-4000}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@database:5432/werkstatt_kanban?schema=public}
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - kanban-internal
+
+  database:
+    image: postgres:16-alpine
+    container_name: werkstatt-kanban-database
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-werkstatt_kanban}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-werkstatt_kanban}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - kanban-internal
+
+volumes:
+  postgres-data:
+
+networks:
+  kanban-internal:
+    driver: bridge

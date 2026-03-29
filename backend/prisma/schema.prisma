@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CardArchiveStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum CardUcStatus {
+  NOT_IN_UC
+  IN_UC
+}
+
+model Workshop {
+  id        String   @id @default(cuid())
+  name      String
+  boards    Board[]
+  absences  AssigneeAbsence[]
+  forecastRules CompletionForecastRule[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("workshops")
+}
+
+model Board {
+  id          String   @id @default(cuid())
+  workshopId  String
+  workshop    Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  groupName   String   @unique
+  title       String
+  columns     Column[]
+  cards       Card[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workshopId])
+  @@map("boards")
+}
+
+model Column {
+  id            String   @id @default(cuid())
+  boardId       String
+  board         Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  key           String
+  title         String
+  position      Int
+  isActive      Boolean  @default(true)
+  cards         Card[]
+  previousCards Card[]   @relation("CardPreviousColumn")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([boardId, key])
+  @@unique([boardId, position])
+  @@index([boardId])
+  @@index([boardId, isActive])
+  @@map("columns")
+}
+
+model Card {
+  id               String            @id @default(cuid())
+  boardId          String
+  board            Board             @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  columnId         String
+  column           Column            @relation(fields: [columnId], references: [id], onDelete: Restrict)
+  archiveStatus    CardArchiveStatus @default(ACTIVE)
+  ucStatus         CardUcStatus      @default(NOT_IN_UC)
+  previousColumnId String?
+  previousColumn   Column?           @relation("CardPreviousColumn", fields: [previousColumnId], references: [id], onDelete: SetNull)
+  position         Int
+  creatorName      String
+  responsibleName  String
+  deviceName       String
+  priority         String
+  dueDate          DateTime
+  statusChangedAt  DateTime          @default(now())
+  completedAt      DateTime?
+  completedYear    Int?
+  completedWeek    Int?
+  completedFromColumnKey   String?
+  completedFromColumnTitle String?
+  partNumber       String
+  serialNumber     String
+  sapNumber        String
+  orderNumber      String
+  comments         Comment[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([boardId])
+  @@index([columnId])
+  @@index([archiveStatus])
+  @@index([ucStatus])
+  @@index([previousColumnId])
+  @@index([partNumber])
+  @@index([serialNumber])
+  @@index([sapNumber])
+  @@index([orderNumber])
+  @@index([deviceName])
+  @@index([dueDate])
+  @@index([statusChangedAt])
+  @@index([completedAt])
+  @@index([completedYear, completedWeek])
+  @@unique([columnId, position, ucStatus])
+  @@map("cards")
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  cardId     String
+  card       Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  authorName String
+  message    String
+  createdAt  DateTime @default(now())
+
+  @@index([cardId])
+  @@index([createdAt])
+  @@map("comments")
+}
+
+model PartNumberSuggestion {
+  id         String   @id @default(cuid())
+  partNumber String   @unique
+  deviceName String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([partNumber])
+  @@index([deviceName])
+  @@map("part_number_suggestions")
+}
+
+model AssigneeAbsence {
+  id              String   @id @default(cuid())
+  workshopId      String
+  workshop        Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  responsibleName String   @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([workshopId])
+  @@index([responsibleName])
+  @@map("assignee_absences")
+}
+
+model CompletionForecastRule {
+  id                   String   @id @default(cuid())
+  workshopId           String
+  workshop             Workshop @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  boardGroupName       String?
+  partNumber           String?
+  columnKey            String
+  estimatedRemainingDays Int
+  blocksCompletion     Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([workshopId, columnKey])
+  @@index([workshopId, boardGroupName, columnKey])
+  @@index([workshopId, partNumber, columnKey])
+  @@map("completion_forecast_rules")
+}
