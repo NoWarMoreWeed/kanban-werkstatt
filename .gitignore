@@ -4,6 +4,7 @@ build/
 .vite/
 .turbo/
 .env
+.env.public
 .env.local
 .env.*.local
 coverage/

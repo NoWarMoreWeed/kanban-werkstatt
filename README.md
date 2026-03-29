@@ -5,7 +5,7 @@
 Interne Webanwendung als digitaler Ersatz für physische Kanban-Boards.
 
 Aktueller Funktionsumfang:
-- mehrere Gruppenboards innerhalb von T/AO425
+- mehrere Gruppenboards innerhalb einer Werkstatt
 - Spalten und Karten pro Board
 - Karten anlegen und bearbeiten
 - Karten zwischen Spalten verschieben
@@ -75,18 +75,70 @@ Damit ist der Compose-Start für lokale Entwicklung so aufgebaut, dass nach dem 
 ## Seed-Daten
 
 Der Seed legt beim ersten Start an:
-- die Einheit T/AO425
+- eine Werkstatt
 - drei Boards: `Rotary`, `Linear`, `Stator`
 - feste Beispielspalten
 - Beispielkarten
 
-Wenn bereits Daten für T/AO425 vorhanden sind, wird der Seed übersprungen und bestehende Daten bleiben erhalten.
+Wenn bereits Werkstattdaten vorhanden sind, wird der Seed übersprungen und bestehende Daten bleiben erhalten.
 
 ## Standard-URLs
 
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:4000`
 - Health: `http://localhost:4000/health`
+
+## Öffentliche Veröffentlichung auf dem Home-Server
+
+Für den öffentlichen Betrieb auf einem Home-Server gibt es einen separaten Deployment-Pfad über `Cloudflare Tunnel`.
+
+Zielbild:
+- `web`: stellt das gebaute Frontend bereit und leitet `/api` intern an das Backend weiter
+- `backend`: Express-API, nicht direkt öffentlich erreichbar
+- `database`: PostgreSQL, nur intern
+- `cloudflared`: veröffentlicht die Website sicher über Cloudflare, ohne offene Router-Portfreigabe
+
+Vorbereitung:
+
+```bash
+copy .env.public.example .env.public
+```
+
+Wichtige Werte in `.env.public`:
+- `POSTGRES_PASSWORD`
+- `DATABASE_URL`
+- `SESSION_SECRET`
+- `MANAGER_MODE_PASSWORD`
+- `CLOUDFLARE_TUNNEL_TOKEN`
+
+Empfohlener Start auf dem Home-Server:
+
+```bash
+npm run deploy:home
+```
+
+Alternativ direkt mit Docker Compose:
+
+```bash
+docker compose --env-file .env.public -f compose.public.yml up --build -d
+```
+
+Hinweise:
+- Für den öffentlichen Betrieb sollte `SESSION_SECRET` lang und zufällig gesetzt werden.
+- `MANAGER_MODE_PASSWORD` muss für den Internetbetrieb zwingend durch ein starkes Passwort ersetzt werden.
+- Die Datenbank wird im öffentlichen Setup nicht nach außen veröffentlicht.
+- Das Frontend ist im öffentlichen Setup unter derselben Domain wie die API erreichbar; `/api` läuft intern über den Web-Container zum Backend.
+
+## CasaOS und fertige Images
+
+Für CasaOS ist zusätzlich [`compose.casaos.yml`](/c:/Users/maiks/Documents/Dev/Kanban/compose.casaos.yml) vorbereitet.
+
+Wichtig:
+- CasaOS arbeitet in diesem Fall am saubersten mit fertigen Images statt mit lokalen `build:`-Anweisungen.
+- Die GitHub-Action in [`.github/workflows/publish-ghcr-images.yml`](/c:/Users/maiks/Documents/Dev/Kanban/.github/workflows/publish-ghcr-images.yml) baut und veröffentlicht dafür:
+  - `ghcr.io/nowarmoreweed/kanban-werkstatt-backend:latest`
+  - `ghcr.io/nowarmoreweed/kanban-werkstatt-web:latest`
+- Nach dem ersten erfolgreichen Workflow-Lauf sollte in GitHub Packages geprüft werden, ob beide Container-Images öffentlich sichtbar sind. Falls nicht, die Paket-Sichtbarkeit einmal auf `public` stellen.
 
 ## Wichtige Umgebungsvariablen
 
@@ -115,7 +167,7 @@ npm run dev
 
 Der bevorzugte Startpfad für Entwicklung bleibt jedoch Docker Compose.
 
-## Manuelle Pr?fung
+## Manuelle Prüfung
 
 Nach dem Start:
 1. Frontend unter `http://localhost:5173` öffnen.

@@ -12,6 +12,8 @@
     "dev:backend": "npm run dev --workspace backend",
     "dev:docker": "docker compose up --build",
     "dev:docker:detach": "docker compose up --build -d",
+    "deploy:home": "docker compose --env-file .env.public -f compose.public.yml up --build -d",
+    "deploy:home:down": "docker compose --env-file .env.public -f compose.public.yml down",
     "build": "npm run build --workspace frontend && npm run build --workspace backend",
     "lint": "npm run lint --workspace frontend && npm run lint --workspace backend"
   },

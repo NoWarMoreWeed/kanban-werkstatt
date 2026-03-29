@@ -1,0 +1,119 @@
+services:
+  backend-init:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.public
+    container_name: werkstatt-kanban-backend-init-public
+    depends_on:
+      database:
+        condition: service_healthy
+    env_file:
+      - .env.public
+    environment:
+      NODE_ENV: ${BACKEND_NODE_ENV:-production}
+      DATABASE_URL: ${DATABASE_URL}
+    command:
+      [
+        "sh",
+        "-lc",
+        "npm run prisma:migrate:deploy && npm run prisma:seed"
+      ]
+    restart: "no"
+    networks:
+      - kanban-public-internal
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.public
+    container_name: werkstatt-kanban-backend-public
+    restart: unless-stopped
+    depends_on:
+      backend-init:
+        condition: service_completed_successfully
+    env_file:
+      - .env.public
+    environment:
+      NODE_ENV: ${BACKEND_NODE_ENV:-production}
+      HOST: ${BACKEND_HOST:-0.0.0.0}
+      PORT: ${BACKEND_INTERNAL_PORT:-4000}
+      DATABASE_URL: ${DATABASE_URL}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - kanban-public-internal
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.public
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    container_name: werkstatt-kanban-web-public
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${PUBLIC_WEB_PORT:-8080}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - kanban-public-internal
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: werkstatt-kanban-cloudflared
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    env_file:
+      - .env.public
+    command:
+      [
+        "tunnel",
+        "--no-autoupdate",
+        "run",
+        "--token",
+        "${CLOUDFLARE_TUNNEL_TOKEN}"
+      ]
+    networks:
+      - kanban-public-internal
+
+  database:
+    image: postgres:16-alpine
+    container_name: werkstatt-kanban-database-public
+    restart: unless-stopped
+    env_file:
+      - .env.public
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-werkstatt_kanban}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-public-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-werkstatt_kanban}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - kanban-public-internal
+
+volumes:
+  postgres-public-data:
+
+networks:
+  kanban-public-internal:
+    driver: bridge

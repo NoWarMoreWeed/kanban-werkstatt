@@ -8,6 +8,10 @@ import { rootRouter } from "./routes/index.js";
 export const createApp = () => {
   const app = express();
 
+  if (env.trustProxy) {
+    app.set("trust proxy", 1);
+  }
+
   app.use(
     cors({
       origin: true,
@@ -19,6 +23,7 @@ export const createApp = () => {
     session({
       name: "werkstatt_kanban_session",
       secret: env.sessionSecret,
+      proxy: env.trustProxy,
       resave: false,
       saveUninitialized: false,
       cookie: {
