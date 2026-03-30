@@ -129,17 +129,6 @@ Hinweise:
 - Die Datenbank wird im öffentlichen Setup nicht nach außen veröffentlicht.
 - Das Frontend ist im öffentlichen Setup unter derselben Domain wie die API erreichbar; `/api` läuft intern über den Web-Container zum Backend.
 
-## CasaOS und fertige Images
-
-Für CasaOS ist zusätzlich [`compose.casaos.yml`](/c:/Users/maiks/Documents/Dev/Kanban/compose.casaos.yml) vorbereitet.
-
-Wichtig:
-- CasaOS arbeitet in diesem Fall am saubersten mit fertigen Images statt mit lokalen `build:`-Anweisungen.
-- Die GitHub-Action in [`.github/workflows/publish-ghcr-images.yml`](/c:/Users/maiks/Documents/Dev/Kanban/.github/workflows/publish-ghcr-images.yml) baut und veröffentlicht dafür:
-  - `ghcr.io/nowarmoreweed/kanban-werkstatt-backend:latest`
-  - `ghcr.io/nowarmoreweed/kanban-werkstatt-web:latest`
-- Nach dem ersten erfolgreichen Workflow-Lauf sollte in GitHub Packages geprüft werden, ob beide Container-Images öffentlich sichtbar sind. Falls nicht, die Paket-Sichtbarkeit einmal auf `public` stellen.
-
 ## Wichtige Umgebungsvariablen
 
 Root `.env` aus `.env.example` anlegen.
