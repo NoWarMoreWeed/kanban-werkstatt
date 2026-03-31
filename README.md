@@ -145,6 +145,32 @@ Wichtige Werte:
 - `BACKEND_INTERNAL_PORT`
 - `DATABASE_URL`
 
+## Umgebungsvariablen auf einem Debian-Server anpassen
+
+Für lokale Tests ohne Docker legst du wie oben beschrieben `.env` an und startest Frontend/Backend mit `npm run dev`. Die gleichen Variablen greifen später auch in Docker Compose, sobald du `.env` oder `.env.public` als `--env-file` übergibst.
+
+### Lokale Entwicklung ohne Docker
+
+1. `cp .env.example .env`
+2. Datei bearbeiten (`nano .env` oder Editor deiner Wahl) und mindestens folgende Werte setzen:
+   - `POSTGRES_PASSWORD`
+   - `DATABASE_URL=postgresql://postgres:<PASSWORD>@localhost:5432/werkstatt_kanban`
+   - `VITE_API_BASE_URL=http://localhost:4000/api`
+   - `BACKEND_HOST=0.0.0.0`
+3. Backend/Frontend mit `npm run dev` starten – Vite und das Backend lesen die Variablen automatisch beim Start ein.
+
+### Öffentlicher Betrieb auf Debian (Docker Compose)
+
+1. `cp .env.public.example .env.public`
+2. Datei bearbeiten und die produktiven Werte setzen (`POSTGRES_PASSWORD`, `SESSION_SECRET`, `MANAGER_MODE_PASSWORD`, `DATABASE_URL`, `VITE_API_BASE_URL=https://deine-domain/api`, `BACKEND_HOST=0.0.0.0`, `BACKEND_PORT=4000`, `PUBLIC_WEB_PORT=8080`, etc.).
+3. Starten oder neu deployen:
+   ```bash
+   docker compose --env-file .env.public -f compose.public.yml up --build -d
+   ```
+4. Änderungen an `.env.public` greifen nach einem erneuten `docker compose up` automatisch, ein kompletter Server-Neustart ist nicht nötig.
+
+Tipp: Auf Debian bleibt die `.env.public` im Projektordner. Bei Bedarf kannst du unterschiedliche Dateien für Staging/Produktion pflegen und sie einfach per `--env-file` übergeben.
+
 ## Lokaler Start ohne Docker
 
 Falls nötig:

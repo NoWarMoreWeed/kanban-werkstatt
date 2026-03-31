@@ -1,12 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useBoards } from "../features/boards/BoardsContext";
+import { pagePaddingClass, panelPaddingClass } from "../styles/layout";
 
 export function BoardOverviewPage() {
   const { boards, workshopName, isLoading, error } = useBoards();
 
   return (
-    <section className="flex min-h-screen flex-col px-10 py-10">
+    <section className={`flex min-h-screen flex-col ${pagePaddingClass}`}>
       <div className="max-w-4xl">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-700 dark:text-zinc-500">
           {workshopName}
@@ -20,23 +21,27 @@ export function BoardOverviewPage() {
       </div>
 
       {isLoading ? (
-        <div className="mt-8 rounded-2xl border border-slate-200 bg-white px-6 py-5 text-sm text-slate-500 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+        <div
+          className={`mt-8 rounded-2xl border border-slate-200 bg-white text-sm text-slate-500 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 ${panelPaddingClass}`}
+        >
           Boards werden geladen…
         </div>
       ) : null}
 
       {error ? (
-        <div className="mt-8 rounded-2xl border border-rose-200 bg-rose-50 px-6 py-5 text-sm text-rose-700 shadow-sm dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
+        <div
+          className={`mt-8 rounded-2xl border border-rose-200 bg-rose-50 text-sm text-rose-700 shadow-sm dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200 ${panelPaddingClass}`}
+        >
           {error}
         </div>
       ) : null}
 
-      <div className="mt-8 grid gap-4 xl:grid-cols-2">
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
         {boards.map((board) => (
           <Link
             key={board.id}
             to={`/boards/${board.id}`}
-            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-colors duration-150 hover:border-slate-300 hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-colors duration-150 hover:border-slate-300 hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800 sm:p-6"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-zinc-500">
               Gruppe

@@ -17,6 +17,7 @@ import { useBoardDetail } from "../features/board-detail/useBoardDetail";
 import { ColumnManagerModal } from "../features/columns";
 import { CardDetailsModal } from "../features/comments";
 import { useManagerMode } from "../features/manager-mode/ManagerModeContext";
+import { pagePaddingClass, panelPaddingClass } from "../styles/layout";
 import type { CardItem } from "../types/api";
 
 export function BoardDetailPage() {
@@ -99,7 +100,7 @@ export function BoardDetailPage() {
 
   if (isBoardLoading) {
     return (
-      <section className="flex min-h-screen items-center px-10 py-10">
+      <section className={`flex min-h-screen items-center ${pagePaddingClass}`}>
         <StatePanel message="Board wird geladen…" />
       </section>
     );
@@ -107,7 +108,7 @@ export function BoardDetailPage() {
 
   if (error) {
     return (
-      <section className="flex min-h-screen items-center px-10 py-10">
+      <section className={`flex min-h-screen items-center ${pagePaddingClass}`}>
         <StatePanel message={error} tone="error" />
       </section>
     );
@@ -115,7 +116,7 @@ export function BoardDetailPage() {
 
   if (!board) {
     return (
-      <section className="flex min-h-screen items-center px-10 py-10">
+      <section className={`flex min-h-screen items-center ${pagePaddingClass}`}>
         <StatePanel message="Das angeforderte Board wurde nicht gefunden." tone="error" />
       </section>
     );
@@ -123,7 +124,7 @@ export function BoardDetailPage() {
 
   const managerSelectionEnabled = isManagerModeActive && viewMode === "active";
   return (
-    <section className="flex min-h-screen flex-col px-10 py-10">
+    <section className={`flex min-h-screen flex-col ${pagePaddingClass}`}>
       <div className="max-w-4xl">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-700 dark:text-zinc-500">
           {board.groupName}
@@ -138,12 +139,14 @@ export function BoardDetailPage() {
       </div>
 
       {saveError ? (
-        <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-6 py-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
+        <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200 sm:px-6">
           {saveError}
         </div>
       ) : null}
 
-      <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 xl:flex-row xl:items-center xl:justify-between">
+      <div
+        className={`mt-6 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 xl:flex-row xl:items-center xl:justify-between ${panelPaddingClass}`}
+      >
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -215,7 +218,9 @@ export function BoardDetailPage() {
       </div>
 
       {viewMode === "active" ? (
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div
+          className={`mt-4 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 ${panelPaddingClass}`}
+        >
           <div className="grid gap-4 xl:grid-cols-[minmax(0,280px)_minmax(0,280px)_auto] xl:items-end">
             <div className="flex flex-col gap-2">
               <label
@@ -389,53 +394,63 @@ export function BoardDetailPage() {
       ) : null}
 
       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
-        <div className="mt-8 grid gap-4 xl:grid-cols-5">
-          {board.columns.map((column) => {
-            const sourceCards = viewMode === "active" ? filteredCards : cards;
-            const columnCards = sourceCards
-              .filter((card) => card.columnId === column.id)
-              .sort((left, right) => left.position - right.position);
+        <div className="mt-8">
+          <div className="flex gap-4 overflow-x-auto pb-4 xl:grid xl:grid-cols-5 xl:overflow-visible xl:pb-0">
+            {board.columns.map((column) => {
+              const sourceCards = viewMode === "active" ? filteredCards : cards;
+              const columnCards = sourceCards
+                .filter((card) => card.columnId === column.id)
+                .sort((left, right) => left.position - right.position);
 
-            return (
-              <BoardColumn
-                key={column.id}
-                column={column}
-                cards={columnCards}
-                absentNameSet={absentNameSet}
-                selectableCards={managerSelectionEnabled}
-                selectedCardIds={selectedCardIds}
-                onToggleSelectedCard={(cardId) => {
-                  setSelectedCardIds((current) =>
-                    current.includes(cardId)
-                      ? current.filter((selectedId) => selectedId !== cardId)
-                      : [...current, cardId]
-                  );
-                }}
-                onEdit={viewMode === "active" ? openEditCardModal : undefined}
-                onManagerEdit={
-                  isManagerModeActive && viewMode !== "active" ? openManagerEditCardModal : undefined
-                }
-                onArchive={viewMode === "active" ? handleArchiveCard : undefined}
-                onDelete={isManagerModeActive ? requestDeleteCard : undefined}
-                onRestoreFromArchive={
-                  isManagerModeActive && viewMode === "archived" ? requestRestoreCard : undefined
-                }
-                onManagerMove={
-                  isManagerModeActive && viewMode === "active" ? requestManagerMoveCard : undefined
-                }
-                onMoveToUc={viewMode === "active" ? handleMoveCardToUc : undefined}
-                onRemoveFromUc={viewMode === "uc" ? handleRemoveCardFromUc : undefined}
-                editingCardId={editingCard?.id ?? null}
-                archivingCardId={archivingCardId}
-                deletingCardId={deletingCardId}
-                restoringCardId={restoringCardId}
-                managerMovingCardId={managerMovingCardId}
-                movingToUcCardId={movingToUcCardId}
-                removingFromUcCardId={removingFromUcCardId}
-                dragDisabled={dragDisabled}
-              />
-            );
-          })}
+              return (
+                <div
+                  key={column.id}
+                  className="flex-shrink-0 basis-[85%] sm:basis-[55%] md:basis-[360px] xl:flex-shrink xl:basis-auto"
+                >
+                  <BoardColumn
+                    column={column}
+                    cards={columnCards}
+                    absentNameSet={absentNameSet}
+                    selectableCards={managerSelectionEnabled}
+                    selectedCardIds={selectedCardIds}
+                    onToggleSelectedCard={(cardId) => {
+                      setSelectedCardIds((current) =>
+                        current.includes(cardId)
+                          ? current.filter((selectedId) => selectedId !== cardId)
+                          : [...current, cardId]
+                      );
+                    }}
+                    onEdit={viewMode === "active" ? openEditCardModal : undefined}
+                    onManagerEdit={
+                      isManagerModeActive && viewMode !== "active"
+                        ? openManagerEditCardModal
+                        : undefined
+                    }
+                    onArchive={viewMode === "active" ? handleArchiveCard : undefined}
+                    onDelete={isManagerModeActive ? requestDeleteCard : undefined}
+                    onRestoreFromArchive={
+                      isManagerModeActive && viewMode === "archived" ? requestRestoreCard : undefined
+                    }
+                    onManagerMove={
+                      isManagerModeActive && viewMode === "active"
+                        ? requestManagerMoveCard
+                        : undefined
+                    }
+                    onMoveToUc={viewMode === "active" ? handleMoveCardToUc : undefined}
+                    onRemoveFromUc={viewMode === "uc" ? handleRemoveCardFromUc : undefined}
+                    editingCardId={editingCard?.id ?? null}
+                    archivingCardId={archivingCardId}
+                    deletingCardId={deletingCardId}
+                    restoringCardId={restoringCardId}
+                    managerMovingCardId={managerMovingCardId}
+                    movingToUcCardId={movingToUcCardId}
+                    removingFromUcCardId={removingFromUcCardId}
+                    dragDisabled={dragDisabled}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </DndContext>
 

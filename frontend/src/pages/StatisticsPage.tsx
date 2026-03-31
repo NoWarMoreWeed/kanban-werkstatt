@@ -4,6 +4,7 @@ import { StatePanel } from "../components/ui/StatePanel";
 import { useAssigneeAbsences } from "../features/assignee-absences";
 import { useManagerMode } from "../features/manager-mode/ManagerModeContext";
 import { useStatistics } from "../features/statistics/useStatistics";
+import { pagePaddingClass, panelPaddingClass } from "../styles/layout";
 import type { ForecastCardItem, StatisticsForecastResponse } from "../types/api";
 import {
   buildStatisticsCards,
@@ -338,7 +339,7 @@ export function StatisticsPage() {
 
   if (!isManagerModeActive) {
     return (
-      <section className="flex min-h-screen items-center px-10 py-10">
+      <section className={`flex min-h-screen items-center ${pagePaddingClass}`}>
         <StatePanel
           message="Die Statistik ist nur im Verwaltermodus sichtbar."
           tone="neutral"
@@ -349,7 +350,7 @@ export function StatisticsPage() {
 
   if (isLoading) {
     return (
-      <section className="flex min-h-screen items-center px-10 py-10">
+      <section className={`flex min-h-screen items-center ${pagePaddingClass}`}>
         <StatePanel message="Statistik wird geladen…" />
       </section>
     );
@@ -357,14 +358,14 @@ export function StatisticsPage() {
 
   if (error) {
     return (
-      <section className="flex min-h-screen items-center px-10 py-10">
+      <section className={`flex min-h-screen items-center ${pagePaddingClass}`}>
         <StatePanel message={error} tone="error" />
       </section>
     );
   }
 
   return (
-    <section className="flex min-h-screen flex-col px-10 py-10">
+    <section className={`flex min-h-screen flex-col ${pagePaddingClass}`}>
       <div className="max-w-4xl">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-700 dark:text-zinc-500">
           Verwaltermodus
@@ -378,7 +379,9 @@ export function StatisticsPage() {
         </p>
       </div>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <section
+        className={`mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 ${panelPaddingClass}`}
+      >
         <div className="grid gap-4 xl:grid-cols-[220px_220px_minmax(0,1fr)_auto] xl:items-end">
           <FilterField label="Gruppe">
             <select
@@ -469,7 +472,9 @@ export function StatisticsPage() {
         />
       </div>
 
-      <section className="mt-4 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <section
+        className={`mt-4 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 ${panelPaddingClass}`}
+      >
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl">
             <h3 className="text-lg font-semibold text-slate-950 dark:text-zinc-100">
@@ -810,7 +815,9 @@ function StatisticsSection({
   children
 }: StatisticsSectionProps) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <section
+      className={`rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 ${panelPaddingClass}`}
+    >
       <h3 className="text-lg font-semibold text-slate-950 dark:text-zinc-100">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-zinc-400">{description}</p>
       <div className={`mt-5 ${contentClassName ?? ""}`}>

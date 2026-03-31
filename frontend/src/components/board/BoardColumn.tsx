@@ -64,7 +64,7 @@ export function BoardColumn({
   return (
     <section
       ref={setNodeRef}
-      className={`min-h-[280px] rounded-2xl border bg-white p-4 shadow-sm transition-colors dark:bg-zinc-900 ${
+      className={`flex h-full min-h-[280px] flex-col rounded-2xl border bg-white p-4 shadow-sm transition-colors dark:bg-zinc-900 ${
         isOver
           ? "border-slate-300 bg-slate-50 dark:border-zinc-700 dark:bg-zinc-800"
           : "border-slate-200 dark:border-zinc-800"
@@ -77,7 +77,7 @@ export function BoardColumn({
         <p className="mt-2 text-xs text-slate-500 dark:text-zinc-500">{cards.length} Karten</p>
       </header>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 flex-1 space-y-3">
         {cards.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500 dark:border-zinc-800 dark:bg-[#232323] dark:text-zinc-500">
             {dragDisabled ? "Keine Karten in dieser Spalte" : "Karte hier ablegen"}

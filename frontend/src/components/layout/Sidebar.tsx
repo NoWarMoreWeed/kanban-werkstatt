@@ -8,12 +8,19 @@ import { ThemeToggle } from "./ThemeToggle";
 const baseLinkClassName =
   "block rounded-xl border px-4 py-3 transition-colors duration-150";
 
-export function Sidebar() {
+type SidebarProps = {
+  className?: string;
+  onNavigate?: () => void;
+};
+
+export function Sidebar({ className = "", onNavigate }: SidebarProps = {}) {
   const { boards, workshopName, isLoading, error } = useBoards();
   const { isManagerModeActive } = useManagerMode();
 
   return (
-    <aside className="flex min-h-screen flex-col border-r border-slate-200 bg-white dark:border-zinc-800 dark:bg-[#171717]">
+    <aside
+      className={`flex h-full min-h-0 flex-col overflow-y-auto border-r border-slate-200 bg-white dark:border-zinc-800 dark:bg-[#171717] ${className}`}
+    >
       <div className="border-b border-slate-200 px-6 py-6 dark:border-zinc-800">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand-700 dark:text-zinc-400">
           {workshopName}
@@ -30,6 +37,7 @@ export function Sidebar() {
         <NavLink
           end
           to="/"
+          onClick={() => onNavigate?.()}
           className={({ isActive }) =>
             `${baseLinkClassName} ${
               isActive
@@ -45,6 +53,7 @@ export function Sidebar() {
         {isManagerModeActive ? (
           <NavLink
             to="/statistics"
+            onClick={() => onNavigate?.()}
             className={({ isActive }) =>
               `${baseLinkClassName} ${
                 isActive
@@ -76,6 +85,7 @@ export function Sidebar() {
           <NavLink
             key={board.id}
             to={`/boards/${board.id}`}
+            onClick={() => onNavigate?.()}
             className={({ isActive }) =>
               `${baseLinkClassName} ${
                 isActive
